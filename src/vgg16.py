@@ -39,7 +39,7 @@ path_graph_def = "vgg16.tfmodel"
 
 ########################################################################
 
-
+########################################################################
 class VGG16:
     """
     The VGG16 model is a Deep Neural Network which has already been
