@@ -49,7 +49,7 @@ def plot_img(im):
     im = im.astype(np.uint8)
     Image.fromarray(im).show()
 
-def plot_imgs(content_img, style_img, mix_img):
+def plot_imgs(content_img, style_img, mixed_img):
     # Create figure with sub-plots.
     fig, axes = plt.subplots(1, 3, figsize=(10, 10))
 
@@ -74,7 +74,7 @@ def plot_imgs(content_img, style_img, mix_img):
 
     # Plot the mixed-image.
     ax = axes.flat[1]
-    ax.imshow(mix_img / 255.0, interpolation=interpolation)
+    ax.imshow(mixed_img / 255.0, interpolation=interpolation)
     ax.set_xlabel("Mixed")
 
     # Plot the style-image

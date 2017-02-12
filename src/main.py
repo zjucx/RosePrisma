@@ -22,6 +22,7 @@
 import numpy as np
 import tensorflow as tf
 import vgg16
+import image as img
 
 def mean_squared_error(a, b):
     return tf.reduce_mean(tf.square(a - b))
@@ -109,7 +110,7 @@ def style_transfer(content_image, style_image,
                    content_layer_ids, style_layer_ids,
                    weight_content=1.5, weight_style=10.0,
                    weight_denoise=0.3,
-                   num_iterations=120, step_size=10.0):
+                   num_iter=120, step_size=10.0):
     model = vgg16.VGG16()
 
     sess = tf.InteractiveSession(graph=model.graph)
@@ -125,15 +126,15 @@ def style_transfer(content_image, style_image,
 
     # Create the loss-function for the content-layers and -image.
     loss_content = content_img_loss(sess=sess,
-                                       model=model,
-                                       content_img=content_image,
-                                       layer_ids=content_layer_ids)
+                                    model=model,
+                                    content_img=content_image,
+                                    layer_ids=content_layer_ids)
 
     # Create the loss-function for the style-layers and -image.
     loss_style = style_img_loss(sess=sess,
-                                   model=model,
-                                   style_img=style_image,
-                                   layer_ids=style_layer_ids)    
+                                model=model,
+                                style_img=style_image,
+                                layer_ids=style_layer_ids)    
 
     # Create the loss-function for the denoising of the mixed-image.
     loss_denoise = create_denoise_loss(model)
@@ -144,9 +145,66 @@ def style_transfer(content_image, style_image,
 
     # Initialize the adjustment values for the loss-functions.
     sess.run([adj_content.initializer,
-                 adj_style.initializer,
-                 adj_denoise.initializer])
+              adj_style.initializer,
+              adj_denoise.initializer])
 
     update_adj_content = adj_content.assign(1.0 / (loss_content + 1e-10))
     update_adj_style = adj_style.assign(1.0 / (loss_style + 1e-10))
     update_adj_denoise = adj_denoise.assign(1.0 / (loss_denoise + 1e-10))
+
+    # define the loss function for applying gradient
+    loss = weight_content*adj_content*loss_content \
+    + weight_style*adj_style*loss_style \
+    + weight_denoise*adj_denoise*loss_denoise
+
+    gradient = tf.gradients(loss, model.input)
+
+    # List of tensors that we will run in each optimization iteration.
+    run_list = [gradient, update_adj_content, update_adj_style, \
+                update_adj_denoise]
+
+    # The mixed-image is initialized with random noise.
+    # It is the same size as the content-image.
+    mixed_image = np.random.rand(*content_image.shape) + 128
+
+    for i in range(num_iter):
+        feed_dict = model.create_feed_dict(image=mixed_image)
+
+        grad, adj_content_val, adj_style_val, adj_denoise_val \
+        = sess.run(run_list, feed_dict=feed_dict)
+
+        # Reduce the dimensionality of the gradient.
+        grad = np.squeeze(grad)
+
+        # Scale the step-size according to the gradient-values.
+        step_size_scaled = step_size / (np.std(grad) + 1e-8)
+
+        # Update the image by following the gradient.
+        mixed_image -= grad * step_size_scaled
+
+        # Ensure the image has valid pixel-values between 0 and 255.
+        mixed_image = np.clip(mixed_image, 0.0, 255.0)
+
+        # Display status once every 10 iterations, and the last.
+        if (i % 10 == 0) or (i == num_iter - 1):
+            print()
+            print("Iteration:", i)
+
+            # Print adjustment weights for loss-functions.
+            msg = "Weight Adj. for Content: {0:.2e}, Style: {1:.2e}, Denoise: {2:.2e}"
+            print(msg.format(adj_content_val, adj_style_val, adj_denoise_val))
+
+            # Plot the content-, style- and mixed-images.
+            img.plot_imgs(content_img=content_image,
+                        style_img=style_image,
+                        mixed_img=mixed_image)
+            
+    print()
+    print("Final image:")
+    img.plot_img(mixed_image)
+
+    # Close the TensorFlow session to release its resources.
+    sess.close()
+    
+    # Return the mixed-image.
+    return mixed_image
