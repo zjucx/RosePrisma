@@ -9,6 +9,13 @@ RosePrisma
 2. vgg16         ----- cnn model
 2. TensorFlow    ----- 深度学习工具包
 ```
+### Using
+> 1) git clone project
+>    git clone https://github.com/zjucx/RosePrisma.git
+> 2) download [vgg16.tfmodel]( https://s3.amazonaws.com/cadl/models/vgg16.tfmodel) to dir model
+>    cd RosePrisma && mkdir model
+> 3) modify content and style image
+>    vi maim.py && change your pic
 
 ### demo
 ![demo1](image/dist/1.png)
