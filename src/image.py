@@ -3,7 +3,7 @@
 # The IMG help function for RosePrisma.
 #
 # This file offer the operations of img
-# load_image、save_image and plot_images
+# load_image save_image and plot_images
 #
 # Implemented in Python 2.7 with TensorFlow v0.11.0rc0
 #
@@ -24,7 +24,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 def load_img(filename, max_size=None):
-    im = Image.open('lena.png')
+    im = Image.open(filename)
     if max_size is not None:
         factor = max_size / np.max(im.size)
         # Scale the image's height and width.
@@ -36,7 +36,7 @@ def load_img(filename, max_size=None):
 
         # Resize the image.
         im = im.resize(size, Image.LANCZOS)
-    return np.float(im)
+    return np.float32(im)
 
 def save_img(im, filename):
     im = np.clip(im, 0.0, 255.0)

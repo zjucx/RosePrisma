@@ -37,7 +37,7 @@ def content_img_loss(sess, model, content_img, layer_ids):
     with model.graph.as_default():
         losses = []
         for layer, value in zip(layers, values):
-            loss = mean_squared_error(tf.constant(layer), tf.constant(value))
+            loss = mean_squared_error(layer, tf.constant(value))
             losses.append(loss)
         # loss function
         total_loss = tf.reduce_mean(losses)
@@ -75,7 +75,7 @@ def style_img_loss(sess, model, style_img, layer_ids):
         values = sess.run(gram_layers, feed_dict=feed_dict)
         losses = []
         for gram_layer, value in zip(gram_layers, values):
-            loss = mean_squared_error(tf.constant(gram_layer), tf.constant(value))
+            loss = mean_squared_error(gram_layer, tf.constant(value))
             losses.append(loss)
         # loss function
         total_loss = tf.reduce_mean(losses)
@@ -168,6 +168,7 @@ def style_transfer(content_image, style_image,
     mixed_image = np.random.rand(*content_image.shape) + 128
 
     for i in range(num_iter):
+        print("Iteration:", i)
         feed_dict = model.create_feed_dict(image=mixed_image)
 
         grad, adj_content_val, adj_style_val, adj_denoise_val \
@@ -184,23 +185,17 @@ def style_transfer(content_image, style_image,
 
         # Ensure the image has valid pixel-values between 0 and 255.
         mixed_image = np.clip(mixed_image, 0.0, 255.0)
-
-        # Display status once every 10 iterations, and the last.
+        
         if (i % 10 == 0) or (i == num_iter - 1):
-            print()
-            print("Iteration:", i)
-
             # Print adjustment weights for loss-functions.
             msg = "Weight Adj. for Content: {0:.2e}, Style: {1:.2e}, Denoise: {2:.2e}"
             print(msg.format(adj_content_val, adj_style_val, adj_denoise_val))
-
-            # Plot the content-, style- and mixed-images.
-            img.plot_imgs(content_img=content_image,
-                        style_img=style_image,
-                        mixed_img=mixed_image)
             
     print()
     print("Final image:")
+    img.plot_imgs(content_img=content_image,
+                        style_img=style_image,
+                        mixed_img=mixed_image)
     img.plot_img(mixed_image)
 
     # Close the TensorFlow session to release its resources.

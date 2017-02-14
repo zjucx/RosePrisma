@@ -19,27 +19,16 @@
 #
 ########################################################################
 
+import os
 import numpy as np
 import tensorflow as tf
-#import download
-import os
-
-########################################################################
-# Various directories and file-names.
-
-# Internet URL for the file with the VGG16 model.
-# Note that this might change in the future and will need to be updated.
-data_url = "https://s3.amazonaws.com/cadl/models/vgg16.tfmodel"
 
 # Directory to store the downloaded data.
-data_dir = "vgg16/"
+data_dir = "model/"
 
 # File containing the TensorFlow graph definition. (Downloaded)
-path_graph_def = "vgg16.tfmodel"
+model_name = "vgg16.tfmodel"
 
-########################################################################
-
-########################################################################
 class VGG16:
     """
     The VGG16 model is a Deep Neural Network which has already been
@@ -51,10 +40,6 @@ class VGG16:
 
     # Name of the tensor for feeding the input image.
     tensor_name_input_image = "images:0"
-
-    # Names of the tensors for the dropout random-values..
-    tensor_name_dropout = 'dropout/random_uniform:0'
-    tensor_name_dropout1 = 'dropout_1/random_uniform:0'
 
     # Names for the convolutional layers in the model for use in Style Transfer.
     layer_names = ['conv1_1/conv1_1', 'conv1_2/conv1_2',
@@ -78,7 +63,7 @@ class VGG16:
             # platforms. In this case it is saved as a binary file.
 
             # Open the graph-def file for binary reading.
-            path = os.path.join(data_dir, path_graph_def)
+            path = os.path.join(data_dir, model_name)
             # with open(path, mode='rb') as file:  this can work well also
             with tf.gfile.FastGFile(path, 'rb') as file:
                 # The graph-def is a saved copy of a TensorFlow graph.
@@ -100,24 +85,14 @@ class VGG16:
             self.layer_tensors = [self.graph.get_tensor_by_name(name + ":0") for name in self.layer_names]
 
     def get_layer_tensors(self, layer_ids):
-        """
-        Return a list of references to the tensors for the layers with the given id's.
-        """
 
         return [self.layer_tensors[idx] for idx in layer_ids]
 
     def get_layer_names(self, layer_ids):
-        """
-        Return a list of names for the layers with the given id's.
-        """
 
         return [self.layer_names[idx] for idx in layer_ids]
 
     def get_all_layer_names(self, startswith=None):
-        """
-        Return a list of all the layers (operations) in the graph.
-        The list can be filtered for names that start with the given string.
-        """
 
         # Get a list of the names for all layers (operations) in the graph.
         names = [op.name for op in self.graph.get_operations()]
@@ -146,21 +121,7 @@ class VGG16:
         # VGG16 model was built to take multiple images as input.
         image = np.expand_dims(image, axis=0)
 
-        if False:
-            # In the original code using this VGG16 model, the random values
-            # for the dropout are fixed to 1.0.
-            # Experiments suggest that it does not seem to matter for
-            # Style Transfer, and this causes an error with a GPU.
-            dropout_fix = 1.0
-
-            # Create feed-dict for inputting data to TensorFlow.
-            feed_dict = {self.tensor_name_input_image: image,
-                         self.tensor_name_dropout: [[dropout_fix]],
-                         self.tensor_name_dropout1: [[dropout_fix]]}
-        else:
-            # Create feed-dict for inputting data to TensorFlow.
-            feed_dict = {self.tensor_name_input_image: image}
+        # Create feed-dict for inputting data to TensorFlow.
+        feed_dict = {self.tensor_name_input_image: image}
 
         return feed_dict
-
-########################################################################
