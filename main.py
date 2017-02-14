@@ -24,17 +24,17 @@ import src.image as img
 if __name__=="__main__":
 
     # content image filename
-    content_filename = 'image/content01.jpg'
+    content_filename = 'image/content02.JPG'
     content_image = img.load_img(content_filename, max_size=None)
 
     # style image filename
-    style_filename = 'image/style06.jpeg'
+    style_filename = 'image/style08.jpg'
     style_image = img.load_img(style_filename, max_size=None)
 
     # the 5th layer in vgg16 model
     content_layer_ids = [4]
 
-    # for the style wo choose the 1 2 3 4th layer in vgg16 model
+    # the style we choose the 1 2 3 4th layer in vgg16 model
     style_layer_ids = [1, 2, 3, 4]
 
     img = rose_prisma.style_transfer(content_image=content_image,
