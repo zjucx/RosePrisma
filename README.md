@@ -10,12 +10,12 @@ RosePrisma
 2. TensorFlow    ----- 深度学习工具包
 ```
 ### Using
-> 1) git clone project
->    git clone https://github.com/zjucx/RosePrisma.git
-> 2) download [vgg16.tfmodel]( https://s3.amazonaws.com/cadl/models/vgg16.tfmodel) to dir model
->    cd RosePrisma && mkdir model
-> 3) modify content and style image
->    vi maim.py && change your pic
+> 1) git clone project </br >
+>    git clone https://github.com/zjucx/RosePrisma.git </br >
+> 2) download [vgg16.tfmodel]( https://s3.amazonaws.com/cadl/models/vgg16.tfmodel) to dir model</br >
+>    cd RosePrisma && mkdir model </br >
+> 3) modify content and style image </br >
+>    vi maim.py && change your pic </br >
 
 ### demo
 ![demo1](image/dist/1.png)
